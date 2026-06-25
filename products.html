@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Products | xTuftyBoyx</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" href="assets/images/skull.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="max-w-7xl mx-auto bg-white shadow-sm">
+  <div id="site-header"></div>
+  <section class="px-6 py-8">
+    <div class="max-w-6xl mx-100px">
+      <h2 class="text-3xl serif mb-6 text-center">Rugs </h2>
+     <!-- <img src="assets/images/skull texture.png" alt="Centered Image" class="w-7 h-7">-->
+      <div id="product-list" class="grid md:grid-cols-3 gap-4"></div>
+      <div id="product-pagination" class="product-pagination"></div>
+    </div>
+  </section>
+  <div id="site-footer"></div>
+</div>
+<script defer src="./data/products.js"></script>
+<script defer src="./templates.js"></script>
+<script>
+const PAGE_SIZE = 12;
+
+function getActivePage() {
+  const params = new URLSearchParams(window.location.search);
+  const page = parseInt(params.get('page'), 10);
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
+function buildPageUrl(page) {
+  const params = new URLSearchParams(window.location.search);
+  if (page > 1) {
+    params.set('page', page);
+  } else {
+    params.delete('page');
+  }
+  const query = params.toString();
+  return `${window.location.pathname}${query ? `?${query}` : ''}`;
+}
+
+async function getProductData(){
+  let products = [];
+  try {
+    const res = await fetch('./data/products.json');
+    if(res.ok){
+      products = await res.json();
+    }
+  } catch (error) {
+    console.warn('JSON load failed, using fallback JS data', error);
+  }
+  return products.length ? products : (window.PRODUCTS || []);
+}
+
+function renderPagination(page, totalPages) {
+  const pagination = document.getElementById('product-pagination');
+  if (!pagination) return;
+  // build arrow controls and full page number links
+  const prevHref = page > 1 ? buildPageUrl(page - 1) : '#';
+  const nextHref = page < totalPages ? buildPageUrl(page + 1) : '#';
+
+  let numbersHtml = '';
+  for (let i = 1; i <= totalPages; i++) {
+    const cls = i === page ? 'page-number active' : 'page-number';
+    const href = i === 1 ? window.location.pathname : buildPageUrl(i);
+    numbersHtml += `<a class="${cls}" href="${href}">${i}</a>`;
+  }
+
+  pagination.innerHTML = `
+    <a class="pagination-back" aria-label="Previous page" href="${prevHref}" aria-disabled="${page<=1}">‹</a>
+    <div class="page-numbers">${numbersHtml}</div>
+    <a class="pagination-next" aria-label="Next page" href="${nextHref}" aria-disabled="${page>=totalPages}">›</a>
+  `;
+}
+
+async function loadProducts(){
+  const list = document.getElementById('product-list');
+  try {
+    const products = await getProductData();
+    if (!products.length) {
+      throw new Error('No products available.');
+    }
+
+    const currentPage = getActivePage();
+    const totalPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
+    const pageIndex = Math.min(currentPage, totalPages) - 1;
+    const pageItems = products.slice(pageIndex * PAGE_SIZE, pageIndex * PAGE_SIZE + PAGE_SIZE);
+
+    list.innerHTML = pageItems.map(p => `
+      <a href="product.html?id=${encodeURIComponent(p.id)}" class="product-card bg-white p-4 text-center overflow-hidden block no-underline">
+        <img loading="lazy" data-primary="${p.images[0]}" data-secondary="${p.images[1] || p.images[0]}" class="product-image mx-auto h-44 object-cover" src="${p.images[0]}" alt="${p.title}">
+        <h3 class="serif italic text-2xl mt-4 text-black">${p.title}</h3>
+        <div class="divider my-3"></div>
+        <p class="font-medium text-black">$${p.price.toFixed(2)}</p>
+      </a>
+    `).join('');
+
+    renderPagination(pageIndex + 1, totalPages);
+
+    document.querySelectorAll('.product-card').forEach(card => {
+      const image = card.querySelector('img');
+      const primary = image.dataset.primary;
+      const secondary = image.dataset.secondary;
+      card.addEventListener('mouseenter', () => { if (secondary) image.src = secondary; });
+      card.addEventListener('mouseleave', () => { image.src = primary; });
+    });
+  } catch (error) {
+    list.textContent = 'Unable to load products.';
+    console.error(error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+</body>
+</html>

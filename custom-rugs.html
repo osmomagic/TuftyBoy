@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Rugs | xTuftyBoyx</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" href="assets/images/skull.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="max-w-7xl mx-auto bg-white shadow-sm">
+
+    <div id="site-header"></div>
+    <section class="px-6 pt-18 py-10">
+ <div class="max-w-4xl mx-auto text-center line-height-2em padding-top-200px">
+            <!--<p class="serif italic text-4xl mb-6">Inspired, tailored, handcrafted.</p> -->
+                        <p class="serif italic text-4xl mb-6">Create your dream rug.</p>
+            <p class="text-gray-600 py-4 leading-8"> Your own chosen design, size & colours. <br>
+             
+              You dream it, we make it. 
+              <br> <br>
+               Get in <a href="meet-your-maker.html#contact" class="text-green-500 hover:underline">
+                touch</a>  to order yours   
+              
+            </p>
+        </div>
+    
+    </section>
+    <section class="px-6 py-2">
+      <div
+        class="parallax hero-slant relative h-[200px]"
+        style="background-image:url('assets/images/tuftedwoolcrop.jpg')"></div>
+        <div class="max-w-4xl mx-auto text-center line-height-2em">
+          
+           
+
+        <!-- <div id="custom-product-list" class="grid md:grid-cols-3 gap-6"></div> -->
+    </section>
+    <section class="px-6 py-6">
+            <!--<p class="serif italic text-4xl mb-6">Inspired, tailored, handcrafted.</p> -->
+                          
+           
+        </div>
+    </section>
+
+    <section class="px-6 py-8 pb-16">
+        <div class="bg-gray-100 p-10 rounded-[1rem]">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h2 class="serif text-3xl mb-4">The Process</h2>
+                    <p class="text-gray-600 leading-8 mb-4">
+                      
+                      ● Send through your idea, along with any reference images, be it a business logo, a theme or your favourite cartoon character. <br>
+                      ● We will work closely with you to refine the design and create a custom rug that fits your vision. <br>
+                      ● Allow 2-3 weeks for fulfillment of your order.
+                     <p class="serif italic text-2xl mb-6"><a href="meet-your-maker.html#contact" class="text-green-500  hover:underline">
+                Get a quote today</a></p>
+                       
+
+                       </p>
+                     </div> 
+                <div class="overflow-hidden rounded-[0.6rem]">
+                    <img src="assets/images/design.jpg" alt="design" class="product-image mx-auto h-full w-full object-cover">
+                </div>
+            </div>
+        </div>
+    </section>
+<section class="px-6 pb-16">
+        <div class="bg-white py-4 rounded-[0.1rem] shadow-sm">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="serif text-3xl text-center mb-6">Interior Design | Gifts | Business Promotion</h2>
+                <div id="maker-mosaic" class="maker-mosaic py-30" data-images="assets/images/DSC08393.jpg, assets/images/shoes off.jpg, assets/images/DSC08157.jpg">
+                  <!-- Mosaic images injected by main.js. Edit the comma-separated list in the data-images attribute to change images. -->
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+    <section class="px-6  py-9 pb-16">
+      <div>
+        
+        <img src="assets/images/xTBx.png" class="w-30 h-35 pt-16 mx-auto mb-2 object-contain center-image max-width: 20px" alt="Background"></div>
+        <div class="max-w-8xl mx-150px text-center line-height-2em">
+           <p class="text-gray-600 leading-8"> 
+              <br> Handcrafted in Wanaka, New Zealand.
+            </p>
+           
+
+        <!-- <div id="custom-product-list" class="grid md:grid-cols-3 gap-6"></div> -->
+    </section>
+
+<div id="site-footer"></div>
+<script defer src="./data/products.js"></script>
+<script defer src="./templates.js"></script>
+<script>
+async function getProductData(){
+  let products = [];
+  try {
+    const res = await fetch('./data/products.json');
+    if(res.ok) products = await res.json();
+  } catch (error) {
+    console.warn('JSON load failed, falling back to JS data', error);
+  }
+  return products.length ? products : (window.PRODUCTS || []);
+}
+
+async function loadCustomRugs(){
+  const list = document.getElementById('custom-product-list');
+  const products = await getProductData();
+  if(!products.length){
+    list.textContent = 'Unable to load custom rugs.';
+    return;
+  }
+
+  list.innerHTML = products.slice(0, 3).map(product => `
+    <a href="product.html?id=${encodeURIComponent(product.id)}" class="product-card bg-white p-6 text-center overflow-hidden block no-underline">
+      <img class="product-image mx-auto h-52 object-cover rounded-md" src="${product.images[0]}" alt="${product.title}">
+      <h3 class="serif italic text-2xl mt-6 text-black">${product.title}</h3>
+      <div class="divider my-4"></div>
+      <p class="font-medium text-black">$${product.price.toFixed(2)}</p>
+      <p class="text-sm text-gray-600 mt-2">${product.description}</p>
+    </a>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', loadCustomRugs);
+</script>
+<script defer src="./main.js"></script>
+</body>
+</html>

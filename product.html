@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product | xTuftyBoyx</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" href="assets/images/skull.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="max-w-7xl mx-auto bg-white shadow-sm">
+  <div id="site-header"></div>
+  <section class="px-6 py-12">
+    <div class="max-w-4xl mx-auto" id="product-detail"></div>
+  </section>
+  <div id="site-footer"></div>
+</div>
+<script defer src="./data/products.js"></script>
+<script defer src="./templates.js"></script>
+<script defer src="./main.js"></script>
+<script>
+function currentProductId(){
+  return new URLSearchParams(window.location.search).get('id');
+}
+
+async function getProductData(){
+  let products = [];
+  try {
+    const res = await fetch('./data/products.json');
+    if(res.ok){
+      products = await res.json();
+    }
+  } catch (error) {
+    console.warn('JSON load failed, using fallback JS data', error);
+  }
+  return products.length ? products : (window.PRODUCTS || []);
+}
+
+async function loadProduct(){
+  const id = currentProductId();
+  const detail = document.getElementById('product-detail');
+  if(!id){
+    detail.innerHTML = '<p>Product identifier missing.</p>';
+    return;
+  }
+
+  try {
+    const products = await getProductData();
+    const product = products.find(item => item.id === id);
+    if(!product){
+      detail.innerHTML = '<p>Product not found.</p>';
+      return;
+    }
+
+    detail.innerHTML = `
+      <div class="grid md:grid-cols-2 gap-8 items-start">
+        <div>
+          ${product.images.map(src => `<div class="mb-4 overflow-hidden rounded-md"><img src="${src}" class="w-full h-64 object-cover lightbox-trigger" alt="${product.title}"></div>`).join('')}
+        </div>
+        <div>
+          <h1 class="serif text-4xl mb-2">${product.title}</h1>
+          <div class="text-xl font-semibold mb-4">$${product.price.toFixed(2)}</div>
+          <p class="text-gray-700 mb-4">${product.description}</p>
+          <div class="mb-4"><strong>Materials:</strong> ${product.materials.join(', ')}</div>
+          <div class="mb-4"><strong>Dimensions:</strong> ${product.dimensions_cm.width} x ${product.dimensions_cm.height} cm</div>
+          <a class="shop-btn inline-block px-6 py-3 bg-black text-white rounded-md" href="${product.stripe_url}" target="_blank" rel="noopener">Buy / Checkout</a>
+        </div>
+      </div>
+    `;
+    if (typeof bindLightboxTriggers === 'function') {
+      bindLightboxTriggers(detail);
+    }
+  } catch (error) {
+    detail.innerHTML = '<p>Unable to load product data.</p>';
+    console.error(error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadProduct);
+</script>
+</body>
+</html>

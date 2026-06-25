@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruglets | xTuftyBoyx</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" href="assets/images/skull.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="max-w-7xl mx-auto bg-white shadow-sm">
+
+    <div id="site-header"></div>
+
+    <section class="px-6 py-9">
+        <div class="max-w-4xl mx-auto text-center line-height-2em">
+            <p class="serif italic text-4xl mb-6">Small rugs, big personality.</p>
+           
+            <p class="text-gray-600 leading-8"> 
+              Pepper your floors or wall with a unique collection of
+               mini rugs, designed to accent your space and express...something.<br> <b>Huge impact, tiny footprint.</b> <br><i>Collect 'em, trade em, give 'em to a friend.</i>
+              
+             </p>
+        </div>
+    </section>
+
+    <section class="px-6 pb-16">
+        <div id="ruglet-list" class="grid md:grid-cols-3 gap-6"></div>
+    </section>
+
+</div>
+
+<section class="px-6 py-14">
+        <div class="max-w-4xl mx-auto text-center line-height-2em">
+            <p class="serif text-3xl mb-6">Tufted Ruglets - Mighty Tiny Floornaments</p>
+             </p>
+        </div>
+    </section>
+
+<div id="site-footer"></div>
+<script defer src="./data/products.js"></script>
+<script defer src="./data/ruglets.js"></script>
+<script defer src="./templates.js"></script>
+<script>
+async function getRugletData(){
+  let products = [];
+  try {
+    const res = await fetch('./data/ruglets.json');
+    if(res.ok){
+      products = await res.json();
+    }
+  } catch (error) {
+    console.warn('Ruglets JSON failed, falling back to JS data', error);
+  }
+  if(!products.length){
+    products = (window.RUGLETS && window.RUGLETS.length) ? window.RUGLETS : (window.PRODUCTS || []).filter(product => ['ember','mori','aurora'].includes(product.id));
+  }
+  return products;
+}
+
+async function loadRuglets(){
+  const products = await getRugletData();
+  const list = document.getElementById('ruglet-list');
+  if (!products.length) {
+    list.textContent = 'Unable to load ruglets.';
+    return;
+  }
+
+  list.innerHTML = products.map(product => `
+    <a href="product.html?id=${encodeURIComponent(product.id)}" class="product-card bg-white p-6 text-center overflow-hidden block no-underline">
+      <img
+        class="product-image mx-auto h-52 object-cover rounded-md"
+        src="${product.images[0]}"
+        data-primary="${product.images[0]}"
+        data-secondary="${product.images[1] || product.images[0]}"
+        alt="${product.title}">
+      <h3 class="serif italic text-2xl mt-6 text-black">${product.title}</h3>
+      <div class="divider my-4"></div>
+      <p class="font-medium text-black">$${product.price.toFixed(2)}</p>
+    </a>
+  `).join('');
+
+  document.querySelectorAll('.product-card').forEach(card => {
+    const image = card.querySelector('img');
+    const primary = image.dataset.primary;
+    const secondary = image.dataset.secondary;
+    card.addEventListener('mouseenter', () => { if (secondary) image.src = secondary; });
+    card.addEventListener('mouseleave', () => { image.src = primary; });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', loadRuglets);
+</script>
+<script defer src="./main.js"></script>
+</body>
+</html>
+
+
+
